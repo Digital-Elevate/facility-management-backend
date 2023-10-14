@@ -1,22 +1,30 @@
 const mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
 
 const db = {};
 
 db.mongoose = mongoose;
 
-db.user = require("./user.model");
-db.role = require("./role.model");
+// Liste des modèles à importer
+const models = [
+  "agencyMember",
+  "commercialProperty",
+  "complaint",
+  "owner",
+  "property",
+  "rentPayment",
+  "room",
+  "serviceRequest",
+  "tenant"
+];
 
-db.agencyMember = require("./agencyMember.model");
-db.commercialProperty = require("./commercialProperty.model");
-db.complaint = require("./complaint.model");
-db.owner = require("./owner.model");
-db.property = require("./property.model");
-db.rentPayment = require("./rentPayment.model");
-db.room = require("./room.model");
-db.serviceRequest = require("./serviceRequest.model");
-db.tenant = require("./tenant.model");
+// Importation des modèles
+models.forEach(model => {
+  try {
+    db[model] = require(`./${model}.model`);
+  } catch (error) {
+    console.error(`Erreur lors de l'importation du modèle ${model}:`, error.message);
+  }
+});
 
 db.AGENCY_MEMBER_ROLE = ["ADMIN", "MANAGER"];
 
