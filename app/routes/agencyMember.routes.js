@@ -55,18 +55,16 @@ module.exports = function(app) {
 
   app.get(
     "/api/agency-members/tenants",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
-    controller.getAllTenants
+    [verifyToken, isAdminOrManager], agencyMemberController.getAllTenants
   );
 
   app.post(
-    "/api/agency-members/create-tenant-account", (req, res) => {
-      console.log('Request body:', req.body);
+    "/api/agency-members/create-tenant-account",
     [
       verifySignUp.checkDuplicateEmail
     ],
     controller.createTenantAccount
-  });
+  );
 
 
 
