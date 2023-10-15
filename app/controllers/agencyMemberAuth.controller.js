@@ -5,69 +5,65 @@ const AgencyMember = db.agencyMember;
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
-exports.signup = (req, res) => {
-  const newUser = new AgencyMember({
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    email: req.body.email,
-    role: req.body.role,
-    password: bcrypt.hashSync(req.body.password, 10),
-  });
+exports.signup = async (req, res) => {
+  try {
+    if (!db.AGENCY_MEMBER_ROLE.includes(req.body.role)) {
+      return res.status(400).json({ error: 'Invalid role value' });
+    }
 
-  if (!db.AGENCY_MEMBER_ROLE.includes(req.body.role)) {
-    return res.status(400).json({ error: 'Invalid role value' });
-  }
+    const newUser = new AgencyMember({
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      role: req.body.role,
+      password: bcrypt.hashSync(req.body.password, 10),
+    });
 
-  newUser.save()
-  .then(() => {
+    await newUser.save();
     res.status(201).json({ message: 'User was registered successfully!' });
-  })
-  .catch((error) => {
-    res.status(500).json({ error: 'Failed to create user' });
-  });
-
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create user', details: error.message });
+  }
 };
 
-exports.signin = (req, res) => {
-  AgencyMember.findOne({
-    email: req.body.email,
-  }).exec((err, user) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
+exports.signin = async (req, res) => {
+  try {
+    const user = await AgencyMember.findOne({ email: req.body.email }).exec();
 
-      if (!user) {
-        return res.status(404).send({ message: "Invalid Email or Password!" });
-      }
+    if (!user) {
+      return res.status(404).send({ message: "Invalid Email or Password!" });
+    }
 
-      var passwordIsValid = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
+    const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
 
-      if (!passwordIsValid) {
-        return res.status(401).send({ message: "Invalid Email or Password!" });
-      }
+    if (!passwordIsValid) {
+      return res.status(401).send({ message: "Invalid Email or Password!" });
+    }
 
-      const token = jwt.sign({ id: user.id },
-                              config.secret,
-                              {
-                                algorithm: 'HS256',
-                                allowInsecureKeySizes: true,
-                                expiresIn: 86400, // 24 hours
-                              });
+    const token = jwt.sign({ id: user.id },
+                            config.secret,
+                            {
+                              algorithm: 'HS256',
+                              expiresIn: 86400, // 24 hours
+                            });
 
-      req.session.token = token;
+    if (!req.session) {
+      return res.status(500).send({ message: "Session not initialized" });
+    }
 
-      res.status(200).send({
-        id: user._id,
-        firstname: user.firstname,
-        lastname: user.lastname,
-        email: user.email,
-        role: user.role
-      });
+    req.session.token = token;
+
+    res.status(200).send({
+      id: user._id,
+      firstname: user.firstname,
+      lastname: user.lastname,
+      email: user.email,
+      role: user.role,
+      accessToken: token  // envoi le token en reponse
     });
+  } catch (err) {
+    res.status(500).send({ message: "Error during signin", details: err.message });
+  }
 };
 
 exports.signout = async (req, res) => {
@@ -75,6 +71,6 @@ exports.signout = async (req, res) => {
     req.session = null;
     return res.status(200).send({ message: "You've been signed out!" });
   } catch (err) {
-    this.next(err);
+    res.status(500).send({ message: "Error during signout", details: err.message });
   }
 };

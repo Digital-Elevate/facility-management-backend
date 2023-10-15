@@ -1,8 +1,9 @@
 const db = require("../models");
-const Tenant = db.tenant;
 const Owner = db.owner;
 const Property = db.property;
 const Room = db.room;
+const Tenant = require("../models/tenant.model");
+const nodemailer = require("nodemailer");
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
@@ -11,47 +12,7 @@ exports.allAccess = (req, res) => {
     res.status(200).send("Public Content.");
 };
 
-exports.createTenantAccount = (req, res) => {
-    const newUser = new Tenant({
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10),
-    });
 
-    newUser.save()
-    .then(() => {
-        res.status(201).json({
-            message: 'New tenant was registered successfully!',
-            status: 'success'
-        });
-    })
-    .catch((error) => {
-        res.status(500).json({ error: 'Failed to create tenant', status: 'failed' });
-    });
-
-};
-
-exports.createOwnerAccount = (req, res) => {
-    const newUser = new Owner({
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10),
-    });
-
-    newUser.save()
-    .then(() => {
-        res.status(201).json({
-            message: 'New owner was registered successfully!',
-            status: 'success'
-        });
-    })
-    .catch((error) => {
-        res.status(500).json({ error: 'Failed to create owner', status: 'failed' });
-    });
-
-};
 
 exports.createProperty = (req, res) => {
     const newProperty = new Property({
@@ -141,15 +102,13 @@ exports.getAllRooms = (req, res) => {
     });
 };
 
-exports.getAllOwners = (req, res) => {
-    Owner.find()
-    .then(owners => {
-        owners.forEach(owner => { delete owner[password] });
-        return res.json(owners);
-    })
-    .catch(error => {
-      res.status(500).json({ error: 'Failed to retrieve owners' });
-    });
+exports.getAllOwners = async (req, res) => {
+    try {
+        const owners = await Owner.find();
+        res.status(200).send(owners);
+    } catch (error) {
+        res.status(500).send({ message: 'Failed to fetch owners', details: error.message });
+    }
 };
 
 exports.getAllTenants = (req, res) => {
@@ -160,4 +119,101 @@ exports.getAllTenants = (req, res) => {
     }).catch(error => {
       res.status(500).json({ error: 'Failed to retrieve owners' });
     });
+};
+
+exports.createTenantAccount = async (req, res) => {
+  try {
+    const tenant = new Tenant({
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 10), 
+    });
+
+    await tenant.save();
+
+    const token = jwt.sign({ id: tenant._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    tenant.resetPasswordToken = token;
+    tenant.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await tenant.save();
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      to: tenant.email,
+      from: process.env.EMAIL_USERNAME,
+      subject: "Mettez à jour votre mot de passe",
+      text: `vous recevez ce mail parceque vous avez un compte créé par Ingata, cliquez ce lien pour mettre à jour votre mot de passe 
+      http://${req.headers.host}/api/tenants/reset-password/${token}\n\n
+      If you did not request this, please ignore this email.`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+    if (err) {
+        console.error('Error sending email:', err);
+        return res.status(500).send({ message: 'Failed to send email', details: err.message });
+    }
+    res.status(201).send({ message: 'Tenant account created successfully!' });
+    });
+
+
+
+    res.status(201).send({ message: 'Tenant account created successfully!' });
+  } catch (error) {
+    res.status(500).send({ message: 'Failed to create tenant account', details: error.message });
+  }
+};
+
+
+exports.createOwnerAccount = async (req, res) => {
+  try {
+    const owner = new Owner({
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 10),
+    });
+
+    await owner.save();
+
+    const token = jwt.sign({ id: owner._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    owner.resetPasswordToken = token;
+    owner.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await owner.save();
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      to: owner.email,
+      from: process.env.EMAIL_USERNAME,
+      subject: "Set your password",
+      text: `An account has been created for you as property owner. Please click on the following link to set your password:
+      http://${req.headers.host}/api/owners/reset-password/${token}\n\n
+      If you did not request this, please ignore this email.`,
+    };
+
+    transporter.sendMail(mailOptions);
+
+    res.status(201).send({ message: 'Owner account created successfully!' });
+  } catch (error) {
+    res.status(500).send({ message: 'Failed to create owner account', details: error.message });
+  }
 };

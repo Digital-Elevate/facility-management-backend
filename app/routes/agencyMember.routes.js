@@ -1,5 +1,8 @@
 const { agencyMemberAuthJwt, agencyMemberActions } = require("../middlewares");
 const controller = require("../controllers/agencyMember.controller");
+const agencyMemberController = require("../controllers/agencyMember.controller.js");
+const verifySignUp = require("../middlewares/agencyMemberVerifySignUp");
+const { verifyToken, isAdminOrManager, isAgencyMember } = require("../middlewares/agencyMemberAuthJwt");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -10,18 +13,7 @@ module.exports = function(app) {
     next();
   });
 
-  app.post(
-    "/api/agency-members/create-tenant-account",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAdmin, agencyMemberActions.checkTenantDuplicateEmail],
-    controller.createTenantAccount
-  );
-
-  app.post(
-    "/api/agency-members/create-owner-account",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAdmin, agencyMemberActions.checkOwnerDuplicateEmail],
-    controller.createOwnerAccount
-  );
-
+  
   app.post(
     "/api/properties",
     [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember, agencyMemberActions.checkOwnerId],
@@ -58,16 +50,31 @@ module.exports = function(app) {
     controller.getAllRooms
   );
 
-  app.get(
-    "/api/agency-members/owners",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
-    controller.getAllOwners
-  );
+    app.get("/api/agency-members/owners", [verifyToken, isAdminOrManager], agencyMemberController.getAllOwners);
+
 
   app.get(
     "/api/agency-members/tenants",
     [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
     controller.getAllTenants
   );
+
+  app.post(
+    "/api/agency-members/create-tenant-account", (req, res) => {
+      console.log('Request body:', req.body);
+    [
+      verifySignUp.checkDuplicateEmail
+    ],
+    controller.createTenantAccount
+  });
+
+
+
+  app.post(
+      "/api/agency-members/create-owner-account",
+      [verifySignUp.checkDuplicateEmail],
+      controller.createOwnerAccount
+  );
+
 
 };

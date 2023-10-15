@@ -1,5 +1,3 @@
 module.exports = {
-  HOST: "0.0.0.0",
-  PORT: 27017,
-  DB: "facility-management_db"
+  MONGO_URI: "mongodb+srv://12345789:12345789@cluster0.i6jvxpr.mongodb.net/facility-management?retryWrites=true&w=majority"
 };

@@ -3,45 +3,36 @@ const Tenant = db.tenant;
 const Owner = db.owner;
 const Property = db.property;
 
-checkTenantDuplicateEmail = (req, res, next) => {
-    // Email
-    Tenant.findOne({
-      email: req.body.email
-    }).exec((err, user) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
+checkTenantDuplicateEmail = async (req, res, next) => {
+  try {
+    const tenant = await Tenant.findOne({ email: req.body.email }).exec();
 
-      if (user) {
-        res.status(400).send({ message: "Failed! Email is already in use!" });
-        return;
-      }
+    if (tenant) {
+      res.status(400).send({ message: "Failed! Email is already in use!" });
+      return;
+    }
 
-      next();
-    });
-
+    next();
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
 
-checkOwnerDuplicateEmail = (req, res, next) => {
-    // Email
-    Owner.findOne({
-      email: req.body.email
-    }).exec((err, user) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
+checkOwnerDuplicateEmail = async (req, res, next) => {
+  try {
+    const owner = await Owner.findOne({ email: req.body.email }).exec();
 
-      if (user) {
-        res.status(400).send({ message: "Failed! Email is already in use!" });
-        return;
-      }
+    if (owner) {
+      res.status(400).send({ message: "Failed! Email is already in use!" });
+      return;
+    }
 
-      next();
-    });
-
+    next();
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
+
 
 checkOwnerId = (req, res, next) => {
     // Email
