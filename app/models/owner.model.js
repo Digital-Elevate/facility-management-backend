@@ -6,7 +6,9 @@ const Owner = mongoose.model(
     firstname: String,
     lastname: String,
     email: String,
-    password: String
+    password: String,
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
   })
 );
 

@@ -1,6 +1,7 @@
 const { agencyMemberAuthJwt, agencyMemberActions } = require("../middlewares");
 const controller = require("../controllers/agencyMember.controller");
 const verifySignUp = require("../middlewares/agencyMemberVerifySignUp");
+const { verifyToken, isAdmin } = require("../middlewares/agencyMemberAuthJwt");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -79,5 +80,14 @@ module.exports = function(app) {
     ],
     controller.createTenantAccount
   });
+
+
+
+  app.post(
+      "/api/agency-members/create-owner-account",
+      [verifySignUp.checkDuplicateEmail],
+      controller.createOwnerAccount
+  );
+
 
 };

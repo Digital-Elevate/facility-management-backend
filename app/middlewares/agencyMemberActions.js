@@ -18,25 +18,21 @@ checkTenantDuplicateEmail = async (req, res, next) => {
   }
 };
 
-checkOwnerDuplicateEmail = (req, res, next) => {
-    // Email
-    Owner.findOne({
-      email: req.body.email
-    }).exec((err, user) => {
-      if (err) {
-        res.status(500).send({ message: err });
-        return;
-      }
+checkOwnerDuplicateEmail = async (req, res, next) => {
+  try {
+    const owner = await Owner.findOne({ email: req.body.email }).exec();
 
-      if (user) {
-        res.status(400).send({ message: "Failed! Email is already in use!" });
-        return;
-      }
+    if (owner) {
+      res.status(400).send({ message: "Failed! Email is already in use!" });
+      return;
+    }
 
-      next();
-    });
-
+    next();
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
+
 
 checkOwnerId = (req, res, next) => {
     // Email
