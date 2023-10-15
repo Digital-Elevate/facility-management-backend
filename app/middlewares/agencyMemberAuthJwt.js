@@ -21,30 +21,17 @@ verifyToken = (req, res, next) => {
   });
 };
 
-isAdmin = async (req, res, next) => {
-  try {
-    const user = await AgencyMember.findById(req.userId).exec();
-    if (user.role === "ADMIN") {
-      next();
-    } else {
-      res.status(403).send({ message: "Require Admin Role!" });
+isAdminOrManager = async (req, res, next) => {
+    try {
+        const user = await AgencyMember.findById(req.userId).exec();
+        if (user.role === "ADMIN" || user.role === "MANAGER") {
+            next();
+        } else {
+            res.status(403).send({ message: "Require Admin or Manager Role!" });
+        }
+    } catch (err) {
+        res.status(500).send({ message: err.message });
     }
-  } catch (err) {
-    res.status(500).send({ message: err.message });
-  }
-};
-
-isManager = async (req, res, next) => {
-  try {
-    const user = await AgencyMember.findById(req.userId).exec();
-    if (user.role === "MANAGER") {
-      next();
-    } else {
-      res.status(403).send({ message: "Require Manager Role!" });
-    }
-  } catch (err) {
-    res.status(500).send({ message: err.message });
-  }
 };
 
 isAgencyMember = async (req, res, next) => {
@@ -62,8 +49,7 @@ isAgencyMember = async (req, res, next) => {
 
 const agencyMemberAuthJwt = {
   verifyToken,
-  isAdmin,
-  isManager,
   isAgencyMember,
+  isAdminOrManager 
 };
 module.exports = agencyMemberAuthJwt;

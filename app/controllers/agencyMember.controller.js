@@ -102,15 +102,13 @@ exports.getAllRooms = (req, res) => {
     });
 };
 
-exports.getAllOwners = (req, res) => {
-    Owner.find()
-    .then(owners => {
-        owners.forEach(owner => { delete owner[password] });
-        return res.json(owners);
-    })
-    .catch(error => {
-      res.status(500).json({ error: 'Failed to retrieve owners' });
-    });
+exports.getAllOwners = async (req, res) => {
+    try {
+        const owners = await Owner.find();
+        res.status(200).send(owners);
+    } catch (error) {
+        res.status(500).send({ message: 'Failed to fetch owners', details: error.message });
+    }
 };
 
 exports.getAllTenants = (req, res) => {
