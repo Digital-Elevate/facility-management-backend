@@ -17,6 +17,7 @@
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.1.0",
-    "mongoose": "^7.6.1"
+    "mongoose": "^7.6.1",
+    "nodemailer": "^6.9.6"
   }
 }

@@ -5,6 +5,8 @@ const cors = require("cors");
 const cookieSession = require("cookie-session");
 const dbConfig = require("./app/config/db.config");
 const app = express();
+require('dotenv').config();
+
 
 const commercialPropertyRoutes = require('./app/routes/commercialProperty.routes');
 

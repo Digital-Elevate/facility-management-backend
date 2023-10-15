@@ -1,9 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const db = require("../models");
-const User = db.user;
 const AgencyMember = db.agencyMember;
-const Role = db.role;
 
 verifyToken = (req, res, next) => {
   let token = req.session.token;
@@ -12,74 +10,60 @@ verifyToken = (req, res, next) => {
     return res.status(403).send({ message: "No token provided!" });
   }
 
-  jwt.verify(token,
-            config.secret,
-            (err, decoded) => {
-              if (err) {
-                return res.status(401).send({
-                  message: "Unauthorized!",
-                });
-              }
-              req.userId = decoded.id;
-              next();
-            });
+  jwt.verify(token, config.secret, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({
+        message: "Unauthorized!",
+      });
+    }
+    req.userId = decoded.id;
+    next();
+  });
 };
 
-isAdmin = (req, res, next) => {
-    AgencyMember.findById(req.userId).exec((err, user) => {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
-
+isAdmin = async (req, res, next) => {
+  try {
+    const user = await AgencyMember.findById(req.userId).exec();
     if (user.role === "ADMIN") {
-        next();
-        return;
+      next();
+    } else {
+      res.status(403).send({ message: "Require Admin Role!" });
     }
-
-    res.status(403).send({ message: "Require Admin Role!" });
-    return;
-  });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
 
-isManager = (req, res, next) => {
-    AgencyMember.findById(req.userId).exec((err, user) => {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
-
+isManager = async (req, res, next) => {
+  try {
+    const user = await AgencyMember.findById(req.userId).exec();
     if (user.role === "MANAGER") {
-        next();
-        return;
+      next();
+    } else {
+      res.status(403).send({ message: "Require Manager Role!" });
     }
-
-    res.status(403).send({ message: "Require Admin Role!" });
-    return;
-  });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
 
-isAgencyMember = (req, res, next) => {
-    AgencyMember.findById(req.userId).exec((err, user) => {
-        if (err) {
-            res.status(500).send({ message: err });
-            return;
-        }
-
-        if(user) {
-            next();
-            return;
-        }
+isAgencyMember = async (req, res, next) => {
+  try {
+    const user = await AgencyMember.findById(req.userId).exec();
+    if (user) {
+      next();
+    } else {
+      res.status(403).send({ message: "Require Agency Member Role!" });
     }
-  );
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
-
-
 
 const agencyMemberAuthJwt = {
   verifyToken,
   isAdmin,
   isManager,
-  isAgencyMember
+  isAgencyMember,
 };
 module.exports = agencyMemberAuthJwt;

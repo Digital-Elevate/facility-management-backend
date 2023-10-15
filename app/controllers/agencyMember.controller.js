@@ -1,8 +1,9 @@
 const db = require("../models");
-const Tenant = db.tenant;
 const Owner = db.owner;
 const Property = db.property;
 const Room = db.room;
+const Tenant = require("../models/tenant.model");
+const nodemailer = require("nodemailer");
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
@@ -160,4 +161,56 @@ exports.getAllTenants = (req, res) => {
     }).catch(error => {
       res.status(500).json({ error: 'Failed to retrieve owners' });
     });
+};
+
+exports.createTenantAccount = async (req, res) => {
+  try {
+    const tenant = new Tenant({
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 10), 
+    });
+
+    await tenant.save();
+
+    const token = jwt.sign({ id: tenant._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    tenant.resetPasswordToken = token;
+    tenant.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await tenant.save();
+
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL_USERNAME,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      to: tenant.email,
+      from: process.env.EMAIL_USERNAME,
+      subject: "Mettez à jour votre mot de passe",
+      text: `vous recevez ce mail parceque vous avez un compte créé par Ingata, cliquez ce lien pour mettre à jour votre mot de passe 
+      http://${req.headers.host}/api/tenants/reset-password/${token}\n\n
+      If you did not request this, please ignore this email.`,
+    };
+
+    transporter.sendMail(mailOptions, (err, info) => {
+  if (err) {
+    console.error('Error sending email:', err);
+    return res.status(500).send({ message: 'Failed to send email', details: err.message });
+  }
+  res.status(201).send({ message: 'Tenant account created successfully!' });
+});
+
+
+
+    res.status(201).send({ message: 'Tenant account created successfully!' });
+  } catch (error) {
+    res.status(500).send({ message: 'Failed to create tenant account', details: error.message });
+  }
 };

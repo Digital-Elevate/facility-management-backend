@@ -1,5 +1,6 @@
 const { agencyMemberAuthJwt, agencyMemberActions } = require("../middlewares");
 const controller = require("../controllers/agencyMember.controller");
+const verifySignUp = require("../middlewares/agencyMemberVerifySignUp");
 
 module.exports = function(app) {
   app.use(function(req, res, next) {
@@ -69,5 +70,14 @@ module.exports = function(app) {
     [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
     controller.getAllTenants
   );
+
+  app.post(
+    "/api/agency-members/create-tenant-account", (req, res) => {
+      console.log('Request body:', req.body);
+    [
+      verifySignUp.checkDuplicateEmail
+    ],
+    controller.createTenantAccount
+  });
 
 };
