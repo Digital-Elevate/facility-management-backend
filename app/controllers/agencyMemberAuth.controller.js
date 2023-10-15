@@ -22,7 +22,7 @@ exports.signup = async (req, res) => {
     await newUser.save();
     res.status(201).json({ message: 'User was registered successfully!' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create user' });
+    res.status(500).json({ error: 'Failed to create user', details: error.message });
   }
 };
 
@@ -44,12 +44,13 @@ exports.signin = async (req, res) => {
                             config.secret,
                             {
                               algorithm: 'HS256',
-                              allowInsecureKeySizes: true,
                               expiresIn: 86400, // 24 hours
                             });
- if (!req.session) {
-    return res.status(500).send({ message: "Session not initialized" });
-  }
+
+    if (!req.session) {
+      return res.status(500).send({ message: "Session not initialized" });
+    }
+
     req.session.token = token;
 
     res.status(200).send({
@@ -57,10 +58,11 @@ exports.signin = async (req, res) => {
       firstname: user.firstname,
       lastname: user.lastname,
       email: user.email,
-      role: user.role
+      role: user.role,
+      accessToken: token  // envoi le token en reponse
     });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send({ message: "Error during signin", details: err.message });
   }
 };
 
@@ -69,6 +71,6 @@ exports.signout = async (req, res) => {
     req.session = null;
     return res.status(200).send({ message: "You've been signed out!" });
   } catch (err) {
-    res.status(500).send({ message: err.message });
+    res.status(500).send({ message: "Error during signout", details: err.message });
   }
 };

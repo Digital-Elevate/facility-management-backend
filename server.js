@@ -25,7 +25,7 @@ mongoose.connect(dbConfig.MONGO_URI, {
   });
 
 app.use(session({
-  secret: process.env.SECREET,
+  secret: 's3cr3tK3y!2023',
   resave: false,
   saveUninitialized: true
 }));
