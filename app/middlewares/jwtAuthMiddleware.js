@@ -14,9 +14,11 @@ module.exports = function(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log("Token decoded:", decoded);
+        console.log("Set userId:", req.userId);
         
         req.userId = decoded.id;
-
+        
         next(); 
     } catch (err) {
         console.error("Error verifying token:", err.message); // Log the error for debugging
