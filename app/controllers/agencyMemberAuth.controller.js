@@ -40,7 +40,7 @@ exports.signin = async (req, res) => {
             return res.status(401).send({ message: "Invalid Email or Password!" });
         }
 
-        const token = jwt.sign({ id: user.id },
+        const token = jwt.sign({ id: user._id },
                                process.env.JWT_SECRET, // changement lawal
                                {
                                    algorithm: 'HS256',
@@ -56,7 +56,7 @@ exports.signin = async (req, res) => {
             accessToken: token  // Send the token in the response
         });
     } catch (err) {
-        console.error("Error during signin:", err.message); // 
+        console.error("Error during signin:", err.message); //
         res.status(500).send({ message: "Error during signin", details: err.message });
     }
 };
