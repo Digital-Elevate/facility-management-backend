@@ -3,7 +3,6 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const cors = require("cors");
 const cookieSession = require("cookie-session");
-const dbConfig = require("./app/config/db.config");
 const jwtAuthMiddleware = require('./app/middlewares/jwtAuthMiddleware');
 const app = express();
 const propertyRoutes = require('./app/routes/property.routes');
@@ -19,12 +18,12 @@ tenantRoutes(app);
 
 const commercialPropertyRoutes = require('./app/routes/commercialProperty.routes');
 const { $where } = require("./app/models/tenant.model");
-app.use('/api/owners/properties', jwtAuthMiddleware); 
+app.use('/api/owners/properties', jwtAuthMiddleware);
 app.use(propertyRoutes);
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
-mongoose.connect(dbConfig.MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -49,7 +48,7 @@ app.get("/", (req, res) => {
 
 require("./app/routes/agencyMember.routes")(app);
 require("./app/routes/agencyMemberAuth.routes")(app);
-app.use('/api', commercialPropertyRoutes);  
+app.use('/api', commercialPropertyRoutes);
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
