@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const Room = mongoose.model(
   "Room",
   new mongoose.Schema({
+    roomName: {
+      type: String,
+      required: true
+    },
     rent_status: {
         type: String,
         enum: ['RENTED', 'UNRENTED'],
