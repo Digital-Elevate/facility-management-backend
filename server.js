@@ -6,6 +6,7 @@ const cookieSession = require("cookie-session");
 const jwtAuthMiddleware = require('./app/middlewares/jwtAuthMiddleware');
 const app = express();
 const propertyRoutes = require('./app/routes/property.routes');
+const roomRoutes = require('./app/routes/room.routes');
 
 app.use(express.json());
 require('dotenv').config();
@@ -20,6 +21,7 @@ const commercialPropertyRoutes = require('./app/routes/commercialProperty.routes
 const { $where } = require("./app/models/tenant.model");
 app.use('/api/owners/properties', jwtAuthMiddleware);
 app.use(propertyRoutes);
+app.use(roomRoutes);
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 

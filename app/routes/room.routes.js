@@ -8,6 +8,6 @@ router.post("/api/room", jwtAuthMiddleware, roleAuthorization, roomController.cr
 router.get('/api/rooms-by-property/:id', jwtAuthMiddleware, roleAuthorization, roomController.getAllRoomsByProperty);
 router.get('/api/rooms/:id', jwtAuthMiddleware, roleAuthorization, roomController.getRoomById);
 router.put('/api/rooms/:id', jwtAuthMiddleware, roleAuthorization, roomController.updateRoom);
-router.delete('/api/rooms/:id', jwtAuthMiddleware, roleAuthorization, propertyController.deleteProperty);
+router.delete('/api/rooms/:id', jwtAuthMiddleware, roleAuthorization, roomController.deleteRoom);
 
 module.exports = router;
