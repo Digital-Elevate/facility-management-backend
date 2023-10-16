@@ -5,13 +5,20 @@ const cors = require("cors");
 const cookieSession = require("cookie-session");
 const dbConfig = require("./app/config/db.config");
 const app = express();
+app.use(express.json());
 require('dotenv').config();
+
+const ownerRoutes = require('./app/routes/owner.routes');
+ownerRoutes(app);
+const tenantRoutes = require('./app/routes/tenant.routes');
+tenantRoutes(app);
 
 
 const commercialPropertyRoutes = require('./app/routes/commercialProperty.routes');
+const { $where } = require("./app/models/tenant.model");
 
 app.use(cors());
-app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(dbConfig.MONGO_URI, {
     useNewUrlParser: true,
@@ -39,7 +46,6 @@ app.get("/", (req, res) => {
 require("./app/routes/agencyMember.routes")(app);
 require("./app/routes/agencyMemberAuth.routes")(app);
 app.use('/api', commercialPropertyRoutes);  
-
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);

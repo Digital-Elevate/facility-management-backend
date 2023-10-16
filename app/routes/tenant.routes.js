@@ -8,4 +8,7 @@ app.post(
     controller.setPassword
   );
   
+app.post("/api/tenants/login", controller.login);
+
 };
+

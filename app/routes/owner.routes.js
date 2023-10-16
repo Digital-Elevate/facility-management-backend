@@ -7,5 +7,9 @@ app.post(
     "/api/owners/reset-password/:token",
     controller.setPassword
   );
+
+  app.post("/api/owners/login", controller.login);
+
   
 };
+

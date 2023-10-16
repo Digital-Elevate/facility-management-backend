@@ -13,7 +13,6 @@ exports.allAccess = (req, res) => {
 };
 
 
-
 exports.createProperty = (req, res) => {
     const newProperty = new Property({
         name: req.body.name,
@@ -111,18 +110,26 @@ exports.getAllOwners = async (req, res) => {
     }
 };
 
-exports.getAllTenants = (req, res) => {
-    Tenant.find()
-    .then(tenants => {
-        tenants.forEach(tenant => { delete tenant[password] });
-        return res.json(tenants);
-    }).catch(error => {
-      res.status(500).json({ error: 'Failed to retrieve owners' });
-    });
+exports.getAllTenants = async (req, res) => {
+    try {
+        const tenants = await Tenant.find();
+        res.status(200).send(tenants);
+    } catch (error) {
+        res.status(500).send({ message: 'Failed to fetch tenants', details: error.message });
+    }
 };
 
+
+
 exports.createTenantAccount = async (req, res) => {
+
   try {
+    const existingTenant = await Tenant.findOne({ email: req.body.email });
+
+    if (existingTenant) {
+      return res.status(400).send({ message: 'Email already exists!' });
+    }
+
     const tenant = new Tenant({
       firstname: req.body.firstname,
       lastname: req.body.lastname,
@@ -139,6 +146,7 @@ exports.createTenantAccount = async (req, res) => {
     tenant.resetPasswordToken = token;
     tenant.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await tenant.save();
+    console.log("Token saved to tenant.");
 
     const transporter = nodemailer.createTransport({
       service: "Gmail",
@@ -152,30 +160,34 @@ exports.createTenantAccount = async (req, res) => {
       to: tenant.email,
       from: process.env.EMAIL_USERNAME,
       subject: "Mettez à jour votre mot de passe",
-      text: `vous recevez ce mail parceque vous avez un compte créé par Ingata, cliquez ce lien pour mettre à jour votre mot de passe 
+      text: `An account has been created for you as property owner. Please click on the following link to set your password:
       http://${req.headers.host}/api/tenants/reset-password/${token}\n\n
-      If you did not request this, please ignore this email.`,
+      If you did not request this, please ignore this email.`, // shortened for brevity
     };
 
     transporter.sendMail(mailOptions, (err, info) => {
-    if (err) {
+      if (err) {
         console.error('Error sending email:', err);
         return res.status(500).send({ message: 'Failed to send email', details: err.message });
-    }
-    res.status(201).send({ message: 'Tenant account created successfully!' });
+      }
+      return res.status(201).send({ message: 'Tenant account created successfully!' });
     });
-
-
-
-    res.status(201).send({ message: 'Tenant account created successfully!' });
   } catch (error) {
-    res.status(500).send({ message: 'Failed to create tenant account', details: error.message });
+    console.error("Error in createTenantAccount:", error);
+    return res.status(500).send({ message: 'Failed to create tenant account', details: error.message });
   }
 };
 
 
+
 exports.createOwnerAccount = async (req, res) => {
   try {
+    // Check if email already exists
+    const existingOwner = await Owner.findOne({ email: req.body.email });
+    if (existingOwner) {
+        return res.status(400).send({ message: 'Email already exists!' });
+    }
+
     const owner = new Owner({
       firstname: req.body.firstname,
       lastname: req.body.lastname,

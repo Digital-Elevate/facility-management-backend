@@ -73,7 +73,7 @@ checkDuplicateOwnerEmail = (req, res, next) => {
   // Email
   Owner.findOne({
     email: req.body.email
-  }).exec((err, tenant) => {
+  }).exec((err, owner) => {
     if (err) {
       res.status(500).send({ message: err });
       return;
