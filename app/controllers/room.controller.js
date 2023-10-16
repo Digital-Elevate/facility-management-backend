@@ -26,10 +26,11 @@ exports.createRoom = async (req, res) => {
 
 exports.getAllRoomsByProperty = async (req, res) => {
     try {
-        const properties = await Room.find();
-        res.status(200).send(properties);
+        const property_id = req.params.id;
+        const rooms = await Room.find({ property_id });
+        res.status(200).send(rooms);
     } catch (error) {
-        res.status(500).send({ message: 'Failed to fetch properties', details: error.message });
+        res.status(500).send({ message: 'Failed to fetch rooms', details: error.message });
     }
 };
 
