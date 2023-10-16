@@ -22,5 +22,5 @@ jobs:
         echo "$DO_SSH_KEY" > deploy_key
         chmod 600 deploy_key
         scp -i deploy_key -r . $DO_USERNAME@$DO_HOST:/root/facilicty-management/facillity-management-backend
-        ssh -i deploy_key $DO_USERNAME@$DO_HOST "cd /path/on/server && docker-compose up --build -d"
+        ssh -i deploy_key . $DO_USERNAME@$DO_HOST "cd /path/on/server && docker-compose up --build -d"
         rm -f deploy_key
