@@ -21,7 +21,8 @@ A comprehensive backend solution for managing facilities, tenants, and owners. D
 
 1. Clone the repository:
    
-```git clone https://github.com/Digital-Elevate/facility-management-backend/```
+```
+git clone https://github.com/Digital-Elevate/facility-management-backend/```
 
 2. Navigate to the project directory:
 
