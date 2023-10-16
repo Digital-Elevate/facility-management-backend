@@ -3,7 +3,6 @@ const session = require('express-session');
 const mongoose = require('mongoose');
 const cors = require("cors");
 const cookieSession = require("cookie-session");
-const dbConfig = require("./app/config/db.config");
 const jwtAuthMiddleware = require('./app/middlewares/jwtAuthMiddleware');
 const app = express();
 const propertyRoutes = require('./app/routes/property.routes');
