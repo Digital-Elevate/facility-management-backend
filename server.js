@@ -4,7 +4,10 @@ const mongoose = require('mongoose');
 const cors = require("cors");
 const cookieSession = require("cookie-session");
 const dbConfig = require("./app/config/db.config");
+const jwtAuthMiddleware = require('./app/middlewares/jwtAuthMiddleware');
 const app = express();
+const propertyRoutes = require('./app/routes/property.routes');
+
 app.use(express.json());
 require('dotenv').config();
 
@@ -16,7 +19,8 @@ tenantRoutes(app);
 
 const commercialPropertyRoutes = require('./app/routes/commercialProperty.routes');
 const { $where } = require("./app/models/tenant.model");
-
+app.use('/api/owners/properties', jwtAuthMiddleware); 
+app.use(propertyRoutes);
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 

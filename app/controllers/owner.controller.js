@@ -1,4 +1,5 @@
 const Owner = require("../models/owner.model");
+const Property = require("../models/property.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -56,5 +57,16 @@ exports.login = async (req, res) => {
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).send({ message: error.message });
+    }
+};
+
+exports.getOwnerProperties = async (req, res) => {
+    try {
+        const ownerId = req.userId; // Assuming you've set the userId in a middleware after verifying the token
+        const properties = await Property.find({ owner_id: ownerId });
+        return res.status(200).send(properties);
+    } catch (error) {
+        console.error("Error fetching owner properties:", error);
+        return res.status(500).send({ message: "Failed to fetch properties", details: error.message });
     }
 };
