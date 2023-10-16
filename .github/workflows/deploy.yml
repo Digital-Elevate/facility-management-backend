@@ -1,6 +1,6 @@
 name: Deploy to DigitalOcean
 
-trigger:
+on:
   push:
     branches:
       - deploy  # Remplacez par le nom de la branche que vous souhaitez surveiller
