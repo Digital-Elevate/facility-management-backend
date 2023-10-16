@@ -21,19 +21,19 @@ A comprehensive backend solution for managing facilities, tenants, and owners. D
 
 1. Clone the repository:
    
-git clone https://github.com/Digital-Elevate/facility-management-backend/
+```git clone https://github.com/Digital-Elevate/facility-management-backend/```
 
 2. Navigate to the project directory:
 
-cd facility-management-backend
+```cd facility-management-backend```
 
 3. Install the required dependencies:
 
-npm install
+```npm install```
 
 4. Start the server:
 
-npm start
+```npm start```
 
 The server should now be running on the specified port (default: 8080).
 
