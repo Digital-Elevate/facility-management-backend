@@ -5,7 +5,10 @@ const Owner = mongoose.model(
   new mongoose.Schema({
     firstname: String,
     lastname: String,
-    email: String,
+     email: {
+        type: String,
+        unique: true // Rendre le champ email unique
+    },
     password: String,
     resetPasswordToken: String,
     resetPasswordExpires: Date,
