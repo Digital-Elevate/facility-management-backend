@@ -8,101 +8,12 @@ const nodemailer = require("nodemailer");
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
 
-exports.allAccess = (req, res) => {
-    res.status(200).send("Public Content.");
-};
-
-
-exports.createProperty = (req, res) => {
-    const newProperty = new Property({
-        name: req.body.name,
-        adress: req.body.adress,
-        owner_id: req.body.owner_id,
-    });
-
-    newProperty.save()
-    .then(() => {
-        res.status(201).json({
-            message: 'New property was registered successfully!',
-            status: 'success'
-        });
-    })
-    .catch((error) => {
-        res.status(500).json({ error: 'Failed to create a new property', status: 'failed' });
-    });
-
-};
-
-exports.updateProperty = (req, res) => {
-
-    const propertyId = req.params.id;
-     const updatedData = req.body;
-
-    Property.findByIdAndUpdate(propertyId, updatedData, { new: true })
-    .then(updatedProperty => {
-        res.json(updatedProperty);
-    }).catch(error => {
-        res.status(500).json({ error: 'Failed to update property' });
-    });
-
-};
-
-exports.createRoom = (req, res) => {
-    const newRoom = new Room({
-        rent_status: req.body.rent_status,
-        payment_status: req.body.payment_status,
-        property_id: req.body.property_id,
-    });
-
-    newRoom.save()
-    .then(() => {
-        res.status(201).json({
-            message: 'New room was registered successfully!',
-            status: 'success'
-        });
-    })
-    .catch((error) => {
-        res.status(500).json({ error: 'Failed to create a new room', status: 'failed' });
-    });
-
-};
-
-exports.updateRoom = (req, res) => {
-
-    const roomId = req.params.id;
-    const updatedData = req.body;
-
-    Room.findByIdAndUpdate(roomId, updatedData, { new: true })
-    .then(updatedRoom => {
-        res.json(updatedRoom);
-    }).catch(error => {
-        res.status(500).json({ error: 'Failed to update property' });
-    });
-
-};
-
-exports.getAllProperties = (req, res) => {
-    Property.find()
-    .then(properties => {
-      res.json(properties);
-    })
-    .catch(error => {
-      res.status(500).json({ error: 'Failed to retrieve properties' });
-    });
-};
-
-exports.getAllRooms = (req, res) => {
-    Room.find()
-    .then(rooms => {
-      res.json(rooms);
-    })
-    .catch(error => {
-      res.status(500).json({ error: 'Failed to retrieve properties' });
-    });
-};
-
 exports.getAllOwners = async (req, res) => {
     try {
+        const userRole = req.userRole;
+
+        if (userRole != 'AGENCY_MEMBER')
+            return res.status(403).send({ message: 'Unauthorized.' });
         const owners = await Owner.find();
         res.status(200).send(owners);
     } catch (error) {
@@ -112,6 +23,10 @@ exports.getAllOwners = async (req, res) => {
 
 exports.getAllTenants = async (req, res) => {
     try {
+        const userRole = req.userRole;
+
+        if (userRole != 'AGENCY_MEMBER')
+            return res.status(403).send({ message: 'Unauthorized.' });
         const tenants = await Tenant.find();
         res.status(200).send(tenants);
     } catch (error) {
@@ -124,6 +39,11 @@ exports.getAllTenants = async (req, res) => {
 exports.createTenantAccount = async (req, res) => {
 
   try {
+    const userRole = req.userRole;
+
+    if (userRole != 'AGENCY_MEMBER')
+        return res.status(403).send({ message: 'Unauthorized.' });
+
     const existingTenant = await Tenant.findOne({ email: req.body.email });
 
     if (existingTenant) {
@@ -134,7 +54,7 @@ exports.createTenantAccount = async (req, res) => {
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 10), 
+      password: bcrypt.hashSync(req.body.password, 10)
     });
 
     await tenant.save();
@@ -182,6 +102,10 @@ exports.createTenantAccount = async (req, res) => {
 
 exports.createOwnerAccount = async (req, res) => {
   try {
+    const userRole = req.userRole;
+
+    if (userRole != 'AGENCY_MEMBER')
+        return res.status(403).send({ message: 'Unauthorized.' });
     // Check if email already exists
     const existingOwner = await Owner.findOne({ email: req.body.email });
     if (existingOwner) {

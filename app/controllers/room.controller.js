@@ -1,12 +1,16 @@
 const Room = require('../models/room.model');
+const Property = require('../models/property.model');
+
 exports.createRoom = async (req, res) => {
     try {
         const userRole = req.userRole;
-
-
         if (userRole != 'AGENCY_MEMBER')
             return res.status(403).send({ message: 'Unauthorized.' });
 
+        const property = await Property.findById(req.body.property_id);
+        if (!property) {
+            return res.status(404).send({ message: 'Property ID not found' });
+        }
         const room = new Room({
             roomName: req.body.roomName,
             rent_status: req.body.rent_status,

@@ -1,24 +1,9 @@
-const { agencyMemberVerifySignUp } = require("../middlewares");
+const express = require('express');
+const router = express.Router();
 const controller = require("../controllers/agencyMemberAuth.controller");
 
-module.exports = function(app) {
-  app.use(function(req, res, next) {
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, Content-Type, Accept"
-    );
-    next();
-  });
+router.post("/api/agency-members/register", controller.signup);
+router.post("/api/agency-members/login", controller.signin);
+router.post("/api/agency-members/signout", controller.signout);
 
-  app.post(
-    "/api/agency-members/register",
-    [
-      agencyMemberVerifySignUp.checkDuplicateEmail
-    ],
-    controller.signup
-  );
-
-  app.post("/api/agency-members/login", controller.signin);
-
-  app.post("/api/agency-members/signout", controller.signout);
-};
+module.exports = router;

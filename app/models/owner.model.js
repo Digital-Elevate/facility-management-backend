@@ -3,13 +3,23 @@ const mongoose = require("mongoose");
 const Owner = mongoose.model(
   "Owner",
   new mongoose.Schema({
-    firstname: String,
-    lastname: String,
-     email: {
+    firstname: {
+      type: String,
+      required: true
+    },
+    lastname: {
+      type: String,
+      required: true
+    },
+    email: {
         type: String,
+        required: true,
         unique: true // Rendre le champ email unique
     },
-    password: String,
+    password: {
+      type: String,
+      required: true
+    },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
   })

@@ -4,45 +4,18 @@ const mongoose = require('mongoose');
 const cors = require("cors");
 const cookieSession = require("cookie-session");
 const jwtAuthMiddleware = require('./app/middlewares/jwtAuthMiddleware');
-const agencyMember = require('./app/middlewares/agencyMember');
 
 require('dotenv').config();
 
 const app = express();
 
-app.use(express.json());
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: 's3cr3tK3y!2023',
-  resave: false,
-  saveUninitialized: true
-}));
-
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-  .then(() => {
-    console.log("Successfully connect to MongoDB.");
-  })
-  .catch(err => {
-    console.error("Connection error", err);
-    process.exit();
-  });
-
 // Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-  secret: 's3cr3tK3y!2023',
-  resave: false,
-  saveUninitialized: true
-}));
 
 // MongoDB Connection
-mongoose.connect(dbConfig.MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
@@ -60,8 +33,8 @@ app.get("/", (req, res) => {
 });
 
 // Agency Member Routes
-require("./app/routes/agencyMember.routes")(app);
-require("./app/routes/agencyMemberAuth.routes")(app);
+const agencyMember = require("./app/routes/agencyMember.routes");
+const agencyMemberAuth = require("./app/routes/agencyMemberAuth.routes");
 
 // Import routes
 const propertyRoutes = require('./app/routes/property.routes');
@@ -77,6 +50,8 @@ app.use(serviceRequestRoutes);
 app.use(serviceRoutes);
 app.use(ownerRoutes);
 app.use(tenantRoutes);
+app.use(agencyMember);
+app.use(agencyMemberAuth);
 app.use('/api', commercialPropertyRoutes);
 
 

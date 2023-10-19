@@ -1,78 +1,27 @@
-const { agencyMemberAuthJwt, agencyMemberActions } = require("../middlewares");
+const express = require('express');
+const router = express.Router();
 const controller = require("../controllers/agencyMember.controller");
-const agencyMemberController = require("../controllers/agencyMember.controller.js");
-const verifySignUp = require("../middlewares/agencyMemberVerifySignUp");
-const { verifyToken, isAdminOrManager, isAgencyMember } = require("../middlewares/agencyMemberAuthJwt");
+const roleAuthorization = require("../middlewares/roleAuthorization");
+const jwtAuthMiddleware = require('../middlewares/jwtAuthMiddleware');
 
-module.exports = function(app) {
-  app.use(function(req, res, next) {
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, Content-Type, Accept"
-    );
-    next();
-  });
+router.get(
+  "/api/agency-members/owners",
+  jwtAuthMiddleware, roleAuthorization, controller.getAllOwners
+);
 
-  
-  app.post(
-    "/api/properties",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember, agencyMemberActions.checkOwnerId],
-    controller.createProperty
-  );
+router.get(
+  "/api/agency-members/tenants",
+  jwtAuthMiddleware, roleAuthorization, controller.getAllTenants
+);
 
-  app.put(
-    "/api/properties/:id",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
-    controller.updateProperty
-  );
+router.post(
+  "/api/agency-members/create-tenant-account",
+  jwtAuthMiddleware, roleAuthorization, controller.createTenantAccount
+);
 
-  app.post(
-    "/api/rooms",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember, agencyMemberActions.checkPropertyId],
-    controller.createRoom
-  );
+router.post(
+  "/api/agency-members/create-owner-account",
+  jwtAuthMiddleware, roleAuthorization, controller.createOwnerAccount
+);
 
-  app.put(
-    "/api/rooms/:id",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
-    controller.updateRoom
-  );
-
-  app.get(
-    "/api/agency-members/properties",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
-    controller.getAllProperties
-  );
-
-  app.get(
-    "/api/agency-members/rooms",
-    [agencyMemberAuthJwt.verifyToken, agencyMemberAuthJwt.isAgencyMember],
-    controller.getAllRooms
-  );
-
-    app.get("/api/agency-members/owners", [verifyToken, isAdminOrManager], agencyMemberController.getAllOwners);
-
-
-  app.get(
-    "/api/agency-members/tenants",
-    [verifyToken, isAdminOrManager], agencyMemberController.getAllTenants
-  );
-
-  app.post(
-    "/api/agency-members/create-tenant-account",
-    [
-      verifySignUp.checkDuplicateEmail
-    ],
-    controller.createTenantAccount
-  );
-
-
-
-  app.post(
-      "/api/agency-members/create-owner-account",
-      [verifySignUp.checkDuplicateEmail],
-      controller.createOwnerAccount
-  );
-
-
-};
+module.exports = router;

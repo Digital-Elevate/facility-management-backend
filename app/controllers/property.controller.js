@@ -1,7 +1,7 @@
 const Property = require('../models/property.model');
 exports.createProperty = async (req, res) => {
     try {
-        const userRole = req.userRole; 
+        const userRole = req.userRole;
 
         let ownerId;
 
@@ -9,6 +9,10 @@ exports.createProperty = async (req, res) => {
             ownerId = req.body.owner_id;
             if (!ownerId) {
                 return res.status(400).send({ message: 'Owner ID is required for agency members.' });
+            }
+            const owner = await User.findById(ownerId);
+            if (!owner) {
+                return res.status(404).send({ message: 'Owner ID not found' });
             }
         } else if (userRole === 'OWNER') {
             ownerId = req.userId;
