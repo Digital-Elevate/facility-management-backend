@@ -4,7 +4,7 @@ const roleAuthorization = require("../middlewares/roleAuthorization");
 const complaintController = require('../controllers/complaint.controller');
 const jwtAuthMiddleware = require('../middlewares/jwtAuthMiddleware');
 
-router.post("/api/complaint", jwtAuthMiddleware, roleAuthorization, complaintController.createComplaint);
+router.post("/api/complaints", jwtAuthMiddleware, roleAuthorization, complaintController.createComplaint);
 router.get('/api/complaints/me', jwtAuthMiddleware, roleAuthorization, complaintController.getMyComplaints);
 router.get('/api/complaints', jwtAuthMiddleware, roleAuthorization, complaintController.getAllComplaints);
 router.get('/api/complaints/:id', jwtAuthMiddleware, roleAuthorization, complaintController.getComplaintById);

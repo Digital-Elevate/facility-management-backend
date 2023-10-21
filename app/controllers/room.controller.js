@@ -13,8 +13,6 @@ exports.createRoom = async (req, res) => {
         }
         const room = new Room({
             roomName: req.body.roomName,
-            rent_status: req.body.rent_status,
-            payment_status: req.body.payment_status,
             property_id : req.body.property_id
         });
 

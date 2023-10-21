@@ -14,7 +14,7 @@ exports.createComplaint = async (req, res) => {
         const complaint = new Complaint({
             description: req.body.description,
             complainant_id: complainantId,
-            complainantType: userRole,
+            complainantType: userRole.charAt(0).toUpperCase() + userRole.substr(1).toLowerCase(),
         });
 
         await complaint.save();
