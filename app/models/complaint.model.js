@@ -9,9 +9,19 @@ const Complaint = mongoose.model(
         enum: ['OPEN', 'IN PROGRESS', 'RESOLVED'],
         default: 'OPEN'
     },
-    tenant_id : {
+    complainant_id : {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Tenant"
+        refPath: "complainantType",
+        required: true
+    },
+    complainantType : {
+      type: String,
+      required: true,
+      enum: ['Tenant', 'Owner'],
+    },
+    createdAt : {
+      type: Date,
+      default: Date.now(),
     }
   })
 );
