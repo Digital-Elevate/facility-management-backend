@@ -1,5 +1,6 @@
 const Owner = require("../models/owner.model");
 const AgencyMember = require("../models/agencyMember.model");
+const Tenant = require("../models/tenant.model");
 
 module.exports = async (req, res, next) => {
     try {
@@ -12,6 +13,12 @@ module.exports = async (req, res, next) => {
         const agencyMember = await AgencyMember.findById(req.userId);
         if (agencyMember) {
             req.userRole = 'AGENCY_MEMBER';
+            return next();
+        }
+
+        const tenant = await Tenant.findById(req.userId);
+        if (tenant) {
+            req.userRole = 'TENANT';
             return next();
         }
 
