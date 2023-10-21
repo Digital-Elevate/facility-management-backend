@@ -1,4 +1,6 @@
 const Property = require('../models/property.model');
+const Owner = require('../models/owner.model');
+
 exports.createProperty = async (req, res) => {
     try {
         const userRole = req.userRole;
@@ -10,7 +12,7 @@ exports.createProperty = async (req, res) => {
             if (!ownerId) {
                 return res.status(400).send({ message: 'Owner ID is required for agency members.' });
             }
-            const owner = await User.findById(ownerId);
+            const owner = await Owner.findById(ownerId);
             if (!owner) {
                 return res.status(404).send({ message: 'Owner ID not found' });
             }
@@ -60,6 +62,9 @@ exports.getPropertyById = async (req, res) => {
 
 exports.updateProperty = async (req, res) => {
     try {
+        const userRole = req.userRole;
+        if (userRole != 'AGENCY_MEMBER')
+            return res.status(403).send({ message: 'Unauthorized.' });
         const property = await Property.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!property) {
             return res.status(404).send({ message: 'Property not found' });
@@ -72,6 +77,9 @@ exports.updateProperty = async (req, res) => {
 
 exports.deleteProperty = async (req, res) => {
     try {
+        const userRole = req.userRole;
+        if (userRole != 'AGENCY_MEMBER')
+            return res.status(403).send({ message: 'Unauthorized.' });
         const property = await Property.findByIdAndDelete(req.params.id);
         if (!property) {
             return res.status(404).send({ message: 'Property not found' });
